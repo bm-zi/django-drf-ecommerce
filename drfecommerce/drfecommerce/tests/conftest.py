@@ -11,4 +11,3 @@ register(ProductFactory)
 @pytest.fixture
 def api_client():
     return APIClient 
-
