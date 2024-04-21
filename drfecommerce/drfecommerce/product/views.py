@@ -9,7 +9,7 @@ from .serializers import CategorySerializer, BrandSerializer, ProductSerializer
 
 class CategoryViewSet(viewsets.ViewSet):
     """
-    A simple Viewset for viewing all categories
+    A simple Viewset for viewing all the categories
     """
     
     queryset = Category.objects.all()
