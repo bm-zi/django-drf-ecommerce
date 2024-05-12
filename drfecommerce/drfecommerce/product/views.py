@@ -1,7 +1,12 @@
-from django.shortcuts import render
-from rest_framework import viewsets
+from django.db import connection
 from drf_spectacular.utils import extend_schema
+from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
+from pygments import highlight
+from pygments.formatters import TerminalFormatter
+from pygments.lexers.sql import SqlLexer
+from sqlparse import format
 
 from .models import Category, Brand, Product
 from .serializers import CategorySerializer, BrandSerializer, ProductSerializer
@@ -35,12 +40,36 @@ class BrandViewSet(viewsets.ViewSet):
     
 class ProductViewSet(viewsets.ViewSet):
     """
-    A simple Viewset for viewing all products
+    Viewset for viewing all products
     """
     
-    queryset = Product.objects.all()
+    # queryset = Product.isactive.all()
+    queryset = Product.objects.all().isactive()
+    lookup_field = "slug"
     
+    def retrieve(self, request, slug=None):
+        serializer = ProductSerializer(
+            self.queryset.filter(slug=slug)
+            .select_related("category", "brand"), 
+            many=True
+        )
+        
+        data =  Response(serializer.data)
+        return data
+
     @extend_schema(responses=ProductSerializer)
     def list(self, request):
         serializer = ProductSerializer(self.queryset, many=True)
+        return Response(serializer.data)
+
+    @action(
+        methods=["get"],
+        detail=False,
+        url_path=r"category/(?P<slug>[\w-]+)",
+    )
+    def list_product_by_category(self, request, slug=None):
+        """
+        An endpoint to return products by category
+        """
+        serializer = ProductSerializer(self.queryset.filter(category__slug=slug), many=True)
         return Response(serializer.data)
