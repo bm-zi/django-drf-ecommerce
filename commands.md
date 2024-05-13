@@ -26,6 +26,12 @@ pip install --upgrade pip
 
 coverage run -m pytest
 
+./manage.py makemigrations
+
+./manage.py migrate
+
+./manage.py createsuperuser
+
 ## pytest
 
 pytest -h # prints options _and_ config file settings
