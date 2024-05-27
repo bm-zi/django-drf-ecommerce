@@ -1,4 +1,5 @@
 from django.db import connection
+from django.db.models import Prefetch
 from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -43,18 +44,25 @@ class ProductViewSet(viewsets.ViewSet):
     Viewset for viewing all products
     """
     
-    # queryset = Product.isactive.all()
     queryset = Product.objects.all().isactive()
     lookup_field = "slug"
     
     def retrieve(self, request, slug=None):
         serializer = ProductSerializer(
             self.queryset.filter(slug=slug)
-            .select_related("category", "brand"), 
+            .select_related("category", "brand")
+            .prefetch_related(Prefetch("product_line__product_image")), 
             many=True
         )
         
         data =  Response(serializer.data)
+        ### 
+        q = list(connection.queries)
+        print(len(q))
+        for qs in q:
+            sqlformatted = format(str(qs["sql"]), reindent=True)
+            print(highlight(sqlformatted, SqlLexer(), TerminalFormatter()))
+        ###
         return data
 
     @extend_schema(responses=ProductSerializer)
