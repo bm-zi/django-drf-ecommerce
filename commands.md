@@ -9,6 +9,10 @@ django-mptt
 drf-spectacular
 pytest-cov
 coverage
+pytest-factoryboy
+pygments
+sqlparse
+pillow
 
 # commands
 
