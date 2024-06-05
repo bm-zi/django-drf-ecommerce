@@ -17,9 +17,9 @@ class CategoryViewSet(viewsets.ViewSet):
     """
     A simple Viewset for viewing all the categories
     """
-    
+
     queryset = Category.objects.all()
-    
+
     @extend_schema(responses=CategorySerializer)
     def list(self, request):
         serializer = CategorySerializer(self.queryset, many=True)
@@ -30,38 +30,39 @@ class BrandViewSet(viewsets.ViewSet):
     """
     A simple Viewset for viewing all brands
     """
-    
+
     queryset = Brand.objects.all()
-    
+
     @extend_schema(responses=BrandSerializer)
     def list(self, request):
         serializer = BrandSerializer(self.queryset, many=True)
         return Response(serializer.data)
-    
-    
+
+
 class ProductViewSet(viewsets.ViewSet):
     """
     Viewset for viewing all products
     """
-    
+
     queryset = Product.objects.all().isactive()
     lookup_field = "slug"
-    
+
     def retrieve(self, request, slug=None):
         serializer = ProductSerializer(
             self.queryset.filter(slug=slug)
             .select_related("category", "brand")
-            .prefetch_related(Prefetch("product_line__product_image")), 
-            many=True
+            .prefetch_related(Prefetch("product_line__product_image"))
+            .prefetch_related(Prefetch("product_line__attribute_value__attribute")),
+            many=True,
         )
-        
-        data =  Response(serializer.data)
-        ### 
-        q = list(connection.queries)
-        print(len(q))
-        for qs in q:
-            sqlformatted = format(str(qs["sql"]), reindent=True)
-            print(highlight(sqlformatted, SqlLexer(), TerminalFormatter()))
+
+        data = Response(serializer.data)
+        ###
+        # q = list(connection.queries)
+        # print(len(q))
+        # for qs in q:
+        #     sqlformatted = format(str(qs["sql"]), reindent=True)
+        #     print(highlight(sqlformatted, SqlLexer(), TerminalFormatter()))
         ###
         return data
 
@@ -79,5 +80,6 @@ class ProductViewSet(viewsets.ViewSet):
         """
         An endpoint to return products by category
         """
-        serializer = ProductSerializer(self.queryset.filter(category__slug=slug), many=True)
+        serializer = ProductSerializer(
+            self.queryset.filter(category__slug=slug), many=True)
         return Response(serializer.data)
