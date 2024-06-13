@@ -4,15 +4,13 @@ from django.db.utils import IntegrityError
 
 from drfecommerce.product.models import Category, Product, ProductLine
 
-# from drfecommerce.product.models import ProductTypeAttribute
-
 # Provide access to databse django_db globally for all tests in this file
 pytestmark = pytest.mark.django_db
 
 
 class TestCategoryModel:
     def test_str_output(self, category_factory):
-        obj = category_factory(name="test_cat")   # overide the name
+        obj = category_factory(name="test_cat")
         assert obj.__str__() == "test_cat"
 
     def test_name_max_length(self, category_factory):
